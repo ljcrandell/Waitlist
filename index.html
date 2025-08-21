@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Waitlist System - The Church of Jesus Christ of Latter-day Saints</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0, 81, 117, 0.1);
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+            border: 1px solid #e8e8e8;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #005175;
+        }
+
+        .church-title {
+            font-size: 14px;
+            color: #005175;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 8px;
+            font-size: 2.2em;
+            font-weight: 400;
+            line-height: 1.2;
+        }
+
+        .subtitle {
+            color: #666;
+            font-size: 16px;
+            font-weight: 300;
+        }
+
+        .add-section {
+            margin-bottom: 40px;
+            padding: 30px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            border-left: 4px solid #005175;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        input {
+            flex: 1;
+            padding: 14px 18px;
+            border: 2px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+            background: white;
+            color: #333;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #005175;
+            box-shadow: 0 0 0 3px rgba(0, 81, 117, 0.1);
+        }
+
+        input::placeholder {
+            color: #888;
+        }
+
+        .btn {
+            padding: 14px 28px;
+            background: #005175;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: inherit;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn:hover:not(:disabled) {
+            background: #003d5c;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 81, 117, 0.3);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .status {
+            text-align: center;
+            font-size: 14px;
+            color: #005175;
+            font-weight: 500;
+            background: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            display: inline-block;
+            margin: 0 auto;
+        }
+
+        .status-container {
+            text-align: center;
+        }
+
+        .waitlist-section {
+            background: white;
+        }
+
+        .waitlist-section h2 {
+            color: #333;
+            margin-bottom: 30px;
+            text-align: center;
+            font-size: 1.6em;
+            font-weight: 400;
+            position: relative;
+        }
+
+        .waitlist-section h2:after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 2px;
+            background: #005175;
+        }
+
+        .waitlist {
+            list-style: none;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .person-item {
+            background: white;
+            margin-bottom: 12px;
+            padding: 20px 24px;
+            border-radius: 4px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 16px;
+            color: #333;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            border: 1px solid #e8e8e8;
+            transition: all 0.3s ease;
+        }
+
+        .person-item:hover {
+            box-shadow: 0 4px 16px rgba(0, 81, 117, 0.15);
+            border-color: #005175;
+            transform: translateY(-2px);
+        }
+
+        .person-name {
+            font-weight: 500;
+            color: #333;
+        }
+
+        .person-controls {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .position {
+            background: #005175;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            min-width: 35px;
+            text-align: center;
+        }
+
+        .delete-btn {
+            background: transparent;
+            color: #ccc;
+            border: none;
+            border-radius: 4px;
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: normal;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+        }
+
+        .person-item:hover .delete-btn {
+            opacity: 1;
+        }
+
+        .delete-btn:hover {
+            background: rgba(220, 53, 69, 0.1);
+            color: #dc3545;
+            transform: scale(1.1);
+        }
+
+        .empty-state {
+            text-align: center;
+            color: #888;
+            font-style: italic;
+            padding: 60px 20px;
+            background: #f8f9fa;
+            border-radius: 4px;
+            border: 2px dashed #ddd;
+        }
+
+        .empty-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+            opacity: 0.3;
+        }
+
+        /* Responsive design */
+        @media (max-width: 600px) {
+            .container {
+                margin: 10px;
+                padding: 24px;
+            }
+
+            h1 {
+                font-size: 1.8em;
+            }
+
+            .input-group {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+            }
+
+            .person-item {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+
+            .person-controls {
+                justify-content: center;
+            }
+        }
+
+        /* Animation for new items */
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .person-item {
+            animation: slideIn 0.3s ease-out;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="church-title">The Church of Jesus Christ of Latter-day Saints</div>
+            <h1>Interview Waitlist</h1>
+            <div class="subtitle">Sign in and keep this page open to see who is up next</div>
+        </div>
+        
+        <div class="add-section">
+            <div class="input-group">
+                <input type="text" id="nameInput" placeholder="Enter your full name" maxlength="60">
+                <button class="btn" id="addBtn">Join Waitlist</button>
+            </div>
+            <div class="status-container">
+                <div class="status" id="status">0/25 spots filled</div>
+            </div>
+        </div>
+
+        <div class="waitlist-section">
+            <h2>Current Waitlist</h2>
+            <ul class="waitlist" id="waitlist">
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        let names = [];
+        const MAX_SIZE = 25;
+
+        function render() {
+            const list = document.getElementById('waitlist');
+            const status = document.getElementById('status');
+            const addBtn = document.getElementById('addBtn');
+            
+            // Update status
+            status.textContent = `${names.length}/25 spots filled`;
+            addBtn.disabled = names.length >= MAX_SIZE;
+            
+            // Clear and rebuild
+            list.innerHTML = '';
+            
+            if (names.length === 0) {
+                list.innerHTML = `
+                    <li class="empty-state">
+                        <div class="empty-icon">👥</div>
+                        <div>No one on the waitlist yet</div>
+                        <div style="margin-top: 8px; font-size: 14px;">Be the first to join!</div>
+                    </li>
+                `;
+                return;
+            }
+            
+            names.forEach((name, index) => {
+                const li = document.createElement('li');
+                li.className = 'person-item';
+                li.innerHTML = `
+                    <span class="person-name">${name}</span>
+                    <div class="person-controls">
+                        <span class="position">#${index + 1}</span>
+                        <button class="delete-btn" data-name="${name}" title="Remove ${name}">×</button>
+                    </div>
+                `;
+                list.appendChild(li);
+            });
+        }
+
+        function addPerson() {
+            const input = document.getElementById('nameInput');
+            const name = input.value.trim();
+            
+            if (!name) {
+                input.placeholder = 'Please enter your name';
+                input.style.borderColor = '#dc3545';
+                setTimeout(() => {
+                    input.placeholder = 'Enter your full name';
+                    input.style.borderColor = '#ddd';
+                }, 2000);
+                return;
+            }
+            
+            if (names.length >= MAX_SIZE) {
+                input.value = '';
+                input.placeholder = 'Waitlist is full (25 people maximum)';
+                input.style.borderColor = '#dc3545';
+                setTimeout(() => {
+                    input.placeholder = 'Enter your full name';
+                    input.style.borderColor = '#ddd';
+                }, 3000);
+                return;
+            }
+            
+            if (names.includes(name)) {
+                input.value = '';
+                input.placeholder = 'Name already on waitlist';
+                input.style.borderColor = '#dc3545';
+                setTimeout(() => {
+                    input.placeholder = 'Enter your full name';
+                    input.style.borderColor = '#ddd';
+                }, 2000);
+                return;
+            }
+            
+            names.push(name);
+            input.value = '';
+            render();
+            
+            // Success feedback
+            input.placeholder = '✓ Added to waitlist!';
+            input.style.borderColor = '#28a745';
+            setTimeout(() => {
+                input.placeholder = 'Enter your full name';
+                input.style.borderColor = '#ddd';
+            }, 2000);
+        }
+
+        // Event delegation for remove buttons
+        document.getElementById('waitlist').addEventListener('click', function(e) {
+            if (e.target.classList.contains('delete-btn')) {
+                const nameToRemove = e.target.getAttribute('data-name');
+                
+                // Double-click protection - require two clicks within 3 seconds
+                const now = Date.now();
+                const lastClick = e.target.dataset.lastClick || 0;
+                const timeDiff = now - lastClick;
+                
+                if (timeDiff > 3000) {
+                    // First click - show warning
+                    e.target.textContent = '✓';
+                    e.target.style.color = '#dc3545';
+                    e.target.style.background = 'rgba(220, 53, 69, 0.1)';
+                    e.target.dataset.lastClick = now;
+                    
+                    // Reset after 3 seconds
+                    setTimeout(() => {
+                        e.target.textContent = '×';
+                        e.target.style.color = '#ccc';
+                        e.target.style.background = 'transparent';
+                        e.target.dataset.lastClick = '0';
+                    }, 3000);
+                    
+                    return;
+                }
+                
+                // Second click within 3 seconds - remove
+                names = names.filter(name => name !== nameToRemove);
+                render();
+            }
+        });
+
+        // Add button event
+        document.getElementById('addBtn').addEventListener('click', addPerson);
+
+        // Enter key support
+        document.getElementById('nameInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                addPerson();
+            }
+        });
+
+        // Initial render
+        render();
+    </script>
+</body>
+</html>
