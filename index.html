@@ -314,7 +314,7 @@
         <div class="header">
             <div class="church-title">The Church of Jesus Christ of Latter-day Saints</div>
             <h1>Interview Waitlist</h1>
-            <div class="subtitle">Sign in and keep this page open to see who is up next</div>
+            <div class="subtitle">Sign up and we'll notify you when an interview slot becomes available</div>
         </div>
         
         <div class="add-section">
@@ -337,6 +337,50 @@
     <script>
         let names = [];
         const MAX_SIZE = 25;
+        const API_BASE = '/.netlify/functions';
+
+        // Load waitlist from server
+        async function loadWaitlist() {
+            try {
+                const response = await fetch(`${API_BASE}/waitlist-data`);
+                const data = await response.json();
+                names = data.waitlist || [];
+                render();
+            } catch (error) {
+                console.error('Error loading waitlist:', error);
+                render(); // Render with empty list
+            }
+        }
+
+        // Save waitlist to server
+        async function saveWaitlist() {
+            console.log('saveWaitlist called with names:', names);
+            try {
+                console.log('Making POST request to:', `${API_BASE}/waitlist-data`);
+                console.log('Sending data:', { waitlist: names });
+                
+                const response = await fetch(`${API_BASE}/waitlist-data`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ waitlist: names })
+                });
+                
+                console.log('Response status:', response.status);
+                console.log('Response ok:', response.ok);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const result = await response.json();
+                console.log('Save result:', result);
+                
+            } catch (error) {
+                console.error('Error saving waitlist:', error);
+            }
+        }
 
         function render() {
             const list = document.getElementById('waitlist');
@@ -375,7 +419,7 @@
             });
         }
 
-        function addPerson() {
+        async function addPerson() {
             const input = document.getElementById('nameInput');
             const name = input.value.trim();
             
@@ -413,6 +457,7 @@
             
             names.push(name);
             input.value = '';
+            await saveWaitlist();
             render();
             
             // Success feedback
@@ -425,7 +470,7 @@
         }
 
         // Event delegation for remove buttons
-        document.getElementById('waitlist').addEventListener('click', function(e) {
+        document.getElementById('waitlist').addEventListener('click', async function(e) {
             if (e.target.classList.contains('delete-btn')) {
                 const nameToRemove = e.target.getAttribute('data-name');
                 
@@ -454,6 +499,7 @@
                 
                 // Second click within 3 seconds - remove
                 names = names.filter(name => name !== nameToRemove);
+                await saveWaitlist();
                 render();
             }
         });
@@ -468,8 +514,11 @@
             }
         });
 
-        // Initial render
-        render();
+        // Load waitlist when page loads
+        window.addEventListener('load', loadWaitlist);
+
+        // Refresh waitlist every 10 seconds to show updates from other users
+        setInterval(loadWaitlist, 10000);
     </script>
 </body>
 </html>
